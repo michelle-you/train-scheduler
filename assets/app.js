@@ -1,6 +1,6 @@
 
 $(document).ready(function() {
-
+    
   // Initialize Firebase
   var config = {
     apiKey: "AIzaSyCEsM8UEBMgV_YGu0HY1Bjc5F8c-JYCqyA",
@@ -15,21 +15,21 @@ $(document).ready(function() {
 
   var database = firebase.database();
 
-    $("#submit-button").on("click", function (event){
-
+    $("#submit-button").on("click", function(event){
+        
         event.preventDefault();
 
-        var $trainName = $("#train-name").val().trim();
-        var $destination = $("#destination").val().trim();
-        var $firstTrain = moment($("#first-train-input").val().trim(), "HH:mm").subtract(1, "years").format("X");;
-        var $frequency = $("#frequency").val().trim();
+        var $trainName = $("#train-name-input").val().trim();
+        var $destination = $("#destination-input").val().trim();
+        var $firstTrain = moment($("#first-train-input").val().trim(), "HH:mm").subtract(1, "years").format("X");
+        var $frequency = $("#frequency-input").val().trim();
 
         if ($trainName === "" || 
             $destination === "" ||
             $firstTrain === "" ||
             $frequency === "") {
 
-            alert("Please fill in all details to add new train");
+            alert("Please Enter Train Information");
 
         } else {
 
@@ -42,54 +42,44 @@ $(document).ready(function() {
 
         database.ref().push(newTrain);
 
-        $("#train-name").val("");
-        $("#destination").val("");
+        $("#train-name-input").val("");
+        $("#destination-input").val("");
         $("#first-train-input").val("");
-        $("#frequency").val("");
+        $("#frequency-input").val("");
 
         };
 
     });
-
-    //creates firebase event when child is added to database.
+    
     database.ref().on("child_added", function(childSnapshot) {
 
-        //collects firebase info in variables
         var trainName = childSnapshot.val().name;
         var destination = childSnapshot.val().destination;
         var trainTime = childSnapshot.val().trainTime;
         var frequency = childSnapshot.val().frequency;
     
-        //convert difference between now and first train to minutes
         var timeUntil = moment().diff(moment.unix(trainTime), "minutes");
-        //time apart remainder
+       
         var timeRemaining = timeUntil % frequency;
-        //calculates minutes until next train
-        var untilArrival = frequency - timeRemaining;
-        //next train
-        var nextTrainTime = moment().add(untilArrival, "m").format("hh:mm A");
-        // adds the intital train time in readable format
+        
+        var nextArrival = frequency - timeRemaining;
+        
+        var nextTrainTime = moment().add(nextArrival, "m").format("hh:mm A");
+    
         var firstTrainFormatted = moment(moment.unix(trainTime), "hh:mm A").format("hh:mm A");
 
-        //creates new road. appends to page
         var newTrain = $("<tr>").append (
             $("<td>").text(trainName),
             $("<td>").text(destination),
             $("<td>").text(firstTrainFormatted),
             $("<td>").text(frequency),
-            $("<td>").text(nextTrainTime),
-            $("<td>").text(untilArrival),
+            $("<td>").text(nextArrival),
             
         );
 
         $("#train-table > tbody").append(newTrain);
 
-    //firebase event closing bracket
+    
     });
 
-
-
-
-
-//final closing bracket
 });
